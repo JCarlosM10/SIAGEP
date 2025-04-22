@@ -1,0 +1,37 @@
+{
+    "mes": "Abril 2025",
+    "ingresos": [
+        {
+            "tipo": "ingreso",
+            "categoria": "salario",
+            "monto": 10220.0,
+            "fecha": "2025-04-17"
+        },
+        {
+            "tipo": "ingreso",
+            "categoria": "horas extra",
+            "monto": 1155.0,
+            "fecha": "2025-04-22"
+        },
+        {
+            "tipo": "ingreso",
+            "categoria": "tranferencia personal ",
+            "monto": 5000.0,
+            "fecha": "2025-04-22"
+        }
+    ],
+    "egresos": [
+        {
+            "tipo": "egreso",
+            "categoria": "renta",
+            "monto": 2675.0,
+            "fecha": "2025-04-17"
+        },
+        {
+            "tipo": "egreso",
+            "categoria": "caf\u00e9",
+            "monto": 360.0,
+            "fecha": "2025-04-22"
+        }
+    ]
+}
