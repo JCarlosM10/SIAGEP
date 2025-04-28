@@ -6,6 +6,7 @@ def transaccion_a_dict(transaccion):
     return {
         "tipo": transaccion.tipo,
         "categoria": transaccion.categoria,
+        "descripcion": transaccion.descripcion,
         "monto": transaccion.monto,
         "fecha": transaccion.fecha.isoformat()
     }
@@ -14,6 +15,7 @@ def dict_a_transaccion(d):
     return Transaccion(
         tipo=d["tipo"],
         categoria=d["categoria"],
+        descripcion=d["descripcion"],
         monto=d["monto"],
         fecha=datetime.fromisoformat(d["fecha"]).date()
     )

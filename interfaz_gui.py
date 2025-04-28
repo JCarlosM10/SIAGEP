@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox,scrolledtext
+from datetime import datetime
 from presupuesto.modelo import PresupuestoMensual
 from presupuesto.operaciones import agregar_transaccion
 from presupuesto.persistencia import cargar_presupuesto, guardar_presupuesto
@@ -10,57 +11,135 @@ presupuesto = cargar_presupuesto(ARCHIVO_JSON)
 
 def registrar():
     tipo = tipo_var.get()
+    if tipo == "Seleccionar":
+        messagebox.showerror("Error", "Seleccione un tipo de transacción.")
+        return
+    
     categoria = entrada_categoria.get()
+    descripcion = entrada_descripcion.get()
+    if descripcion == "Seleccionar":
+        messagebox.showerror("Error", "Seleccione una categoría.")
+        return
+
+    fecha = entrada_fecha.get() if not fecha_actual.get() else datetime.today().strftime("%d-%m-%Y")
+
+    if not fecha_actual.get():
+        try:
+            fecha_obj = datetime.strptime(fecha, "%d-%m-%Y")
+            fecha = fecha_obj.date()
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha inválido. Use DD-MM-AAAA.")
+            return
+    else:
+        fecha = datetime.today().date()
+        
     try:
         monto = float(entrada_monto.get())
     except ValueError:
         messagebox.showerror("Error", "El monto debe ser un número.")
         return
 
-    agregar_transaccion(presupuesto, tipo, categoria, monto)
+    if not fecha:
+        messagebox.showerror("Error", "La fecha no puede estar vacía.")
+        return
+
+    agregar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha)
     guardar_presupuesto(presupuesto, ARCHIVO_JSON)
     messagebox.showinfo("Éxito", f"{tipo.capitalize()} registrado.")
     entrada_categoria.delete(0, tk.END)
     entrada_monto.delete(0, tk.END)
+    entrada_fecha.delete(0, tk.END)
     actualizar_resultado()
 
 def actualizar_resultado():
-    resumen = f"Saldo actual: ${presupuesto.saldo_actual():.2f}\n\n"
+    total_width = 60
+    hora_actual = datetime.now().strftime("%d-%m-%Y %I:%M %p")
+    resumen = f"Saldo actual (al {hora_actual}): \n${presupuesto.saldo_actual():.2f}\n\n"
+
+    ingresos_ordenados = sorted(presupuesto.ingresos, key=lambda x: x.fecha)
     resumen += "Ingresos:\n"
-    for t in presupuesto.ingresos:
-        resumen += f"- {t.categoria}: ${t.monto:.2f}\n"
+    for t in ingresos_ordenados:
+        fecha_user = t.fecha.strftime("%d-%m-%Y")
+        line = f"- {t.categoria:<15} | {t.descripcion}: ${t.monto:.2f}"
+        resumen += f"{line:<{total_width-5}}{fecha_user:>25}\n"
+    egresos_ordenados = sorted(presupuesto.egresos, key=lambda x: x.fecha)  
     resumen += "\nEgresos:\n"
-    for t in presupuesto.egresos:
-        resumen += f"- {t.categoria}: ${t.monto:.2f}\n"
+    for t in egresos_ordenados:
+        fecha_user = t.fecha.strftime("%d-%m-%Y")
+        line = f"- {t.categoria:<15} | {t.descripcion}: ${t.monto:.2f}"
+        resumen += f"{line:<{total_width-5}}{fecha_user:>25}\n"
+
+    area_resultado.config(state="normal")    
     area_resultado.delete("1.0", tk.END)
     area_resultado.insert(tk.END, resumen)
+    area_resultado.config(state="disabled")
 
 # Ventana principal
 ventana = tk.Tk()
 ventana.title("SIAGEP - Presupuesto Personal")
+ventana.minsize(610,400)
 
 # Tipo (ingreso/egreso)
 tipo_var = tk.StringVar()
-tipo_var.set("ingreso")
+tipo_var.set("Seleccionar")
 ttk.Label(ventana, text="Tipo de transacción:").pack()
-ttk.Combobox(ventana, textvariable=tipo_var, values=["ingreso", "egreso"]).pack()
+ttk.Combobox(ventana, textvariable=tipo_var, values=["Ingreso", "Egreso"],state="readonly").pack()
+
+#Fecha
+def toggle_entrada_fecha(*args):
+    if fecha_actual.get():
+        entrada_fecha.pack_forget()
+    else:
+        entrada_fecha.pack(after=check_fecha)
+
+ttk.Label(ventana, text="Fecha (DD-MM-AAAA):").pack()
+fecha_actual = tk.BooleanVar()
+fecha_actual.set(True)
+fecha_actual.trace("w",toggle_entrada_fecha)
+check_fecha = ttk.Checkbutton(ventana, text="Usar fecha actual", variable=fecha_actual) ; check_fecha.pack()
+entrada_fecha = ttk.Entry(ventana)
+if not fecha_actual.get():
+    entrada_fecha.pack_forget()
+
+#Frame para datos de entrada
+frame_inputs = ttk.Frame(ventana)
+frame_inputs.pack(pady=10, padx=10, fill="x")
 
 # Categoría
-ttk.Label(ventana, text="Categoría:").pack()
-entrada_categoria = ttk.Entry(ventana)
-entrada_categoria.pack()
+ttk.Label(frame_inputs, text="Categoría:").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+categorias_ing = ["Salario", "Horas extras", "Inversiones", "Otros"]
+categorias_eg = ["Alimentos", "Vivienda" ,"Transporte", "Entretenimiento", "Salud", "Educación", "Otros"]
+categoria_var = tk.StringVar()
+categoria_var.set("Seleccionar")
+entrada_categoria = ttk.Combobox(frame_inputs, textvariable=categoria_var, state="readonly")
+entrada_categoria.grid(row=0, column=1, sticky="e", padx=20, pady=5)
+
+def actualizar_categorias(*args):
+    tipo = tipo_var.get()
+    if tipo == "Ingreso":
+        entrada_categoria['values'] = categorias_ing
+    elif tipo == "Egreso":
+        entrada_categoria['values'] = categorias_eg
+    else:
+        entrada_categoria['values'] = []
+tipo_var.trace("w", actualizar_categorias)
+
+#Descripción
+ttk.Label(frame_inputs, text="Descripción:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+entrada_descripcion = ttk.Entry(frame_inputs)
+entrada_descripcion.grid(row=1, column=1, sticky="e", padx=20, pady=5)
 
 # Monto
-ttk.Label(ventana, text="Monto:").pack()
-entrada_monto = ttk.Entry(ventana)
-entrada_monto.pack()
+ttk.Label(frame_inputs, text="Monto:").grid(row=2, column=0, sticky="w", padx=5, pady=5)
+entrada_monto = ttk.Entry(frame_inputs)
+entrada_monto.grid(row=2, column=1, sticky="e", padx=20, pady=5)
 
 # Botón para registrar
 ttk.Button(ventana, text="Registrar", command=registrar).pack(pady=10)
 
 # Área de resultados
-area_resultado = tk.Text(ventana, height=15, width=50)
-area_resultado.pack()
+area_resultado = scrolledtext.ScrolledText(ventana, width=50, height=15)
+area_resultado.pack(pady=10, padx=10, fill="both", expand=True)
 
 # Iniciar
 actualizar_resultado()

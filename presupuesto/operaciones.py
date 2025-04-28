@@ -1,13 +1,11 @@
 from presupuesto.modelo import PresupuestoMensual, Transaccion
-import datetime
 
-def agregar_transaccion(presupuesto, tipo, categoria, monto):
-    fecha = datetime.date.today()
-    transaccion = Transaccion(tipo=tipo, categoria=categoria, monto=monto, fecha=fecha)
+def agregar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha):
+    transaccion = Transaccion(tipo=tipo, categoria=categoria, descripcion=descripcion, monto=monto, fecha=fecha)
     
-    if tipo == "ingreso":
+    if tipo == "Ingreso":
         presupuesto.ingresos.append(transaccion)
-    elif tipo == "egreso":
+    elif tipo == "Egreso":
         presupuesto.egresos.append(transaccion)
     else:
         raise ValueError("Tipo de transacción inválido.")
