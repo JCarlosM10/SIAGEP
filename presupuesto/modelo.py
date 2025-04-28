@@ -6,6 +6,7 @@ import datetime
 class Transaccion:
     tipo: str  # "ingreso" o "egreso"
     categoria: str
+    descripcion: str
     monto: float
     fecha: datetime.date
 
