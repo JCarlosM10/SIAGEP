@@ -100,6 +100,13 @@
             "descripcion": "Cine",
             "monto": 1000.0,
             "fecha": "2025-04-24"
+        },
+        {
+            "tipo": "Egreso",
+            "categoria": "Internet",
+            "descripcion": "Pago Mensual",
+            "monto": 500.0,
+            "fecha": "2025-05-03"
         }
     ]
 }

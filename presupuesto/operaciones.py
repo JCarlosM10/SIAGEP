@@ -15,3 +15,5 @@ def mostrar_resumen(presupuesto):
     print(f"Ingresos: ${sum(t.monto for t in presupuesto.ingresos):.2f}")
     print(f"Egresos: ${sum(t.monto for t in presupuesto.egresos):.2f}")
     print(f"Saldo actual: ${presupuesto.saldo_actual():.2f}")
+
+
