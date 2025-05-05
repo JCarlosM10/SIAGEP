@@ -3,11 +3,11 @@ from tkinter import ttk, messagebox,scrolledtext
 from datetime import datetime
 from presupuesto.modelo import PresupuestoMensual
 from presupuesto.operaciones import agregar_transaccion
-from presupuesto.persistencia import cargar_presupuesto, guardar_presupuesto
+from presupuesto.persistencia import cargar_desde_excel, guardar_en_excel
 
-ARCHIVO_JSON = "data/presupuesto.json" 
+ARCHIVO_EXCEL = "data/presupuesto.xlsx" 
 
-presupuesto = cargar_presupuesto(ARCHIVO_JSON)
+presupuesto = cargar_desde_excel(ARCHIVO_EXCEL)
 
 def registrar():
     tipo = tipo_var.get()
@@ -44,7 +44,7 @@ def registrar():
         return
 
     agregar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha)
-    guardar_presupuesto(presupuesto, ARCHIVO_JSON)
+    guardar_en_excel(presupuesto, ARCHIVO_EXCEL)
     messagebox.showinfo("Éxito", f"{tipo.capitalize()} registrado.")
     entrada_categoria.delete(0, tk.END)
     entrada_monto.delete(0, tk.END)
