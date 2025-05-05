@@ -42,6 +42,20 @@
             "descripcion": "Tarde Viernes 25",
             "monto": 3500.0,
             "fecha": "2025-04-25"
+        },
+        {
+            "tipo": "Ingreso",
+            "categoria": "Otros",
+            "descripcion": "Renta caj\u00f3n",
+            "monto": 350.0,
+            "fecha": "2025-05-01"
+        },
+        {
+            "tipo": "Ingreso",
+            "categoria": "Horas extras",
+            "descripcion": "dia feriado",
+            "monto": 1200.0,
+            "fecha": "2025-04-30"
         }
     ],
     "egresos": [
@@ -100,6 +114,34 @@
             "descripcion": "Cine",
             "monto": 1000.0,
             "fecha": "2025-04-24"
+        },
+        {
+            "tipo": "Egreso",
+            "categoria": "Entretenimiento",
+            "descripcion": "netflix abril 2025",
+            "monto": 119.0,
+            "fecha": "2025-04-29"
+        },
+        {
+            "tipo": "Egreso",
+            "categoria": "Otros",
+            "descripcion": "fiesta ",
+            "monto": 750.0,
+            "fecha": "2025-04-29"
+        },
+        {
+            "tipo": "Egreso",
+            "categoria": "Salud",
+            "descripcion": "consulta MaxiloFacial",
+            "monto": 900.0,
+            "fecha": "2025-04-02"
+        },
+        {
+            "tipo": "Egreso",
+            "categoria": "Salud",
+            "descripcion": "consulta otorrino",
+            "monto": 800.0,
+            "fecha": "2025-04-01"
         }
     ]
 }

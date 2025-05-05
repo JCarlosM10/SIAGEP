@@ -20,7 +20,7 @@ def dict_a_transaccion(d):
         fecha=datetime.fromisoformat(d["fecha"]).date()
     )
 
-def guardar_presupuesto(presupuesto, archivo="SIAGEP/data/presupuesto.json"):
+def guardar_presupuesto(presupuesto, archivo="data/presupuesto.json"):
     data = {
         "mes": presupuesto.mes,
         "ingresos": [transaccion_a_dict(t) for t in presupuesto.ingresos],

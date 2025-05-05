@@ -86,6 +86,7 @@ ttk.Label(ventana, text="Tipo de transacción:").pack()
 ttk.Combobox(ventana, textvariable=tipo_var, values=["Ingreso", "Egreso"],state="readonly").pack()
 
 #Fecha
+
 def toggle_entrada_fecha(*args):
     if fecha_actual.get():
         entrada_fecha.pack_forget()
@@ -93,13 +94,15 @@ def toggle_entrada_fecha(*args):
         entrada_fecha.pack(after=check_fecha)
 
 ttk.Label(ventana, text="Fecha (DD-MM-AAAA):").pack()
-fecha_actual = tk.BooleanVar()
-fecha_actual.set(True)
-fecha_actual.trace("w",toggle_entrada_fecha)
-check_fecha = ttk.Checkbutton(ventana, text="Usar fecha actual", variable=fecha_actual) ; check_fecha.pack()
-entrada_fecha = ttk.Entry(ventana)
-if not fecha_actual.get():
-    entrada_fecha.pack_forget()
+fecha_actual = tk.BooleanVar(value=False)
+fecha_actual.trace_add("write", toggle_entrada_fecha)
+entrada_fecha = ttk.Entry(ventana)                                                          # Entry fecha
+
+check_fecha = ttk.Checkbutton(ventana, text="Usar fecha actual", variable=fecha_actual)     # Checkbox
+check_fecha.pack()
+
+toggle_entrada_fecha()
+
 
 #Frame para datos de entrada
 frame_inputs = ttk.Frame(ventana)
