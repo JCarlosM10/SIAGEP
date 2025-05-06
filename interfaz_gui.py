@@ -1,13 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox,scrolledtext
-from tkinter.ttk import Progressbar
 from datetime import datetime
 from presupuesto.modelo import PresupuestoMensual
-from presupuesto.operaciones import agregar_transaccion
+from presupuesto.operaciones import agregar_transaccion, agregar_ahorro
 from presupuesto.persistencia import cargar_desde_excel, guardar_en_excel
 
 ARCHIVO_EXCEL = "data/presupuesto.xlsx" 
-
 presupuesto = cargar_desde_excel(ARCHIVO_EXCEL)
 
 
@@ -56,30 +54,57 @@ def registrar():
         messagebox.showerror("Error", "El monto debe ser un número.")
         return
 
-    agregar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha)
+    agregar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha, tipo_gasto)
     guardar_en_excel(presupuesto, ARCHIVO_EXCEL)
     messagebox.showinfo("Éxito", f"{tipo.capitalize()} registrado.")
     tipo_var.set("Seleccionar")
     entrada_categoria.set("Seleccionar")
     entrada_descripcion.delete(0, tk.END)
     entrada_monto.delete(0, tk.END)
-    fecha_actual.set(False)
+    fecha_actual.set(True)
     entrada_fecha.delete(0, tk.END)
     actualizar_resultado()
 
 # Función para registrar aportaciones al ahorro
 def registrar_aportacion():
+    tipo = "Ahorro"
     try:
         monto_aportacion = float(entrada_aportacion.get())
         if monto_aportacion < 0:
             messagebox.showerror("Error", "El monto de la aportación no puede ser negativo.")
             return
-        presupuesto.aportaciones_ahorro.append(monto_aportacion)
-        messagebox.showinfo("Éxito", f"Aportación al ahorro registrada: ${monto_aportacion:.2f}")
-        entrada_aportacion.delete(0, tk.END)
-        actualizar_resultado()
     except ValueError:
         messagebox.showerror("Error", "Ingrese un monto válido para la aportación.")
+
+    fecha = entrada_fecha.get() if not fecha_actual.get() else datetime.today().strftime("%d-%m-%Y")
+
+    if not fecha_actual.get():
+        try:
+            fecha_obj = datetime.strptime(fecha, "%d-%m-%Y")
+            fecha = fecha_obj.date()
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha inválido. Use DD-MM-AAAA.")
+            return
+    else:
+        fecha = datetime.today().date()
+    
+    if not fecha:
+        messagebox.showerror("Error", "La fecha no puede estar vacía.")
+        return
+    
+    descripcion_ahorro = entrada_descripcion_ahorro.get()
+    if not descripcion_ahorro:
+        messagebox.showerror("Error", "Escribe una descripción.")
+        return
+
+    agregar_ahorro(presupuesto, tipo, monto_aportacion, descripcion_ahorro, fecha)
+    guardar_en_excel(presupuesto, ARCHIVO_EXCEL)
+    messagebox.showinfo("Éxito", f"Aportación al ahorro registrada: ${monto_aportacion:.2f}")
+    entrada_aportacion.delete(0, tk.END)
+    entrada_descripcion_ahorro.delete(0, tk.END)
+    fecha_actual.set(True)
+    entrada_fecha.delete(0, tk.END)
+    actualizar_resultado()
 
 def actualizar_resultado():
     total_width = 60
@@ -97,6 +122,12 @@ def actualizar_resultado():
     for t in egresos_ordenados:
         fecha_user = t.fecha.strftime("%d-%m-%Y")
         line = f"- {t.categoria:<15} | {t.descripcion}: ${t.monto:.2f}"
+        resumen += f"{line:<{total_width-5}}{fecha_user:>25}\n"
+    ahorros_ordenados = sorted(presupuesto.ahorros, key=lambda x: x.fecha)
+    resumen += "\nAportaciones al Ahorro:\n"
+    for t in ahorros_ordenados:
+        fecha_user = t.fecha.strftime("%d-%m-%Y")
+        line = f"- {t.descripcion}: ${t.monto:.2f}"
         resumen += f"{line:<{total_width-5}}{fecha_user:>25}\n"
 
     area_resultado.config(state="normal")    
@@ -182,7 +213,7 @@ def monitor_sizes():
 # Ventana principal
 ventana = tk.Tk()
 ventana.title("SIAGEP - Presupuesto Personal")
-ventana.minsize(950,600)
+ventana.minsize(960,700)
 
 # Configuración de la ventana principal
 ventana.rowconfigure(0, weight=1)
@@ -248,7 +279,7 @@ entrada_monto = ttk.Entry(frame_inputs,width=18)
 entrada_monto.grid(row=2, column=1, sticky="e", padx=20, pady=5)
 
 # Botón para registrar
-ttk.Button(frame_main, text="Registrar", command=registrar).pack(pady=10)
+ttk.Button(frame_main, text="Registrar Movimiento", command=registrar).pack(pady=10)
 
 # Frame ahorros
 frame_aportacion = ttk.Frame(frame_main)
@@ -256,10 +287,16 @@ frame_aportacion.pack(pady=10, padx=10, fill="x")
 
 # Aportaciones al ahorro
 ttk.Label(frame_aportacion, text="Aportaciones al ahorro:").grid(row=0, column=0, sticky="w", padx=5, pady=5)
-entrada_aportacion = ttk.Entry(frame_aportacion)
-entrada_aportacion.grid(row=0, column=1, sticky="e", padx=20, pady=5)
+entrada_aportacion = ttk.Entry(frame_aportacion, width=18)
+entrada_aportacion.grid(row=0, column=1, sticky="e", padx=5, pady=5)
 
-ttk.Button(frame_aportacion, text="Registrar Aportación", command=registrar_aportacion).grid(row=0, column=2, sticky="e", padx=20, pady=5)
+# Botón para registrar aportación (placed in row=0, column=2)
+ttk.Button(frame_aportacion, text="Registrar Aportación", command=registrar_aportacion).grid(row=0, column=2, sticky="w", padx=5, pady=5)
+
+# Descripción de la aportación
+ttk.Label(frame_aportacion, text="Descripción:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+entrada_descripcion_ahorro = ttk.Entry(frame_aportacion, width=18)
+entrada_descripcion_ahorro.grid(row=1, column=1, columnspan=1, sticky="e", padx=5, pady=5)
 
 # Área de resultados
 area_resultado = scrolledtext.ScrolledText(frame_main, width=50, height=15)
