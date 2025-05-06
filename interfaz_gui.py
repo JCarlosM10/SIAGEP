@@ -4,11 +4,12 @@ from tkinter.ttk import Progressbar
 from datetime import datetime
 from presupuesto.modelo import PresupuestoMensual
 from presupuesto.operaciones import agregar_transaccion
-from presupuesto.persistencia import cargar_presupuesto, guardar_presupuesto
+from presupuesto.persistencia import cargar_desde_excel, guardar_en_excel
 
-ARCHIVO_JSON = "data/presupuesto.json" 
+ARCHIVO_EXCEL = "data/presupuesto.xlsx" 
 
-presupuesto = cargar_presupuesto(ARCHIVO_JSON)
+presupuesto = cargar_desde_excel(ARCHIVO_EXCEL)
+
 
 # Funciones para registros y actualizaciones
 # Función para registrar transacciones
@@ -19,8 +20,7 @@ def registrar():
         return
     
     categoria = entrada_categoria.get()
-    descripcion = entrada_descripcion.get()
-    if descripcion == "Seleccionar":
+    if categoria == "Seleccionar":
         messagebox.showerror("Error", "Seleccione una categoría.")
         return
     
@@ -40,22 +40,30 @@ def registrar():
             return
     else:
         fecha = datetime.today().date()
-        
+    
+    if not fecha:
+        messagebox.showerror("Error", "La fecha no puede estar vacía.")
+        return
+
+    descripcion = entrada_descripcion.get()
+    if not descripcion:
+        messagebox.showerror("Error", "Escribe una descripción.")
+        return
+
     try:
         monto = float(entrada_monto.get())
     except ValueError:
         messagebox.showerror("Error", "El monto debe ser un número.")
         return
 
-    if not fecha:
-        messagebox.showerror("Error", "La fecha no puede estar vacía.")
-        return
-
     agregar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha)
-    guardar_presupuesto(presupuesto, ARCHIVO_JSON)
+    guardar_en_excel(presupuesto, ARCHIVO_EXCEL)
     messagebox.showinfo("Éxito", f"{tipo.capitalize()} registrado.")
-    entrada_categoria.delete(0, tk.END)
+    tipo_var.set("Seleccionar")
+    entrada_categoria.set("Seleccionar")
+    entrada_descripcion.delete(0, tk.END)
     entrada_monto.delete(0, tk.END)
+    fecha_actual.set(False)
     entrada_fecha.delete(0, tk.END)
     actualizar_resultado()
 
