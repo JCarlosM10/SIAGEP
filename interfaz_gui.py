@@ -328,7 +328,7 @@ frame_percentages.pack(pady=10, padx=10, fill="x")
 # Distribución de gastos
 ttk.Label(frame_percentages, text="Distribución de Gastos", font=("Arial", 14, "bold")).pack(pady=5)
 style = ttk.Style()
-style.configure("Chunky.Horizontal.TProgressbar", barsize=1000,bordercolor='white',thickness=1000)
+style.configure("Chunky.Horizontal.TProgressbar", barsize=1000,bordercolor='white',thickness=15)
 
 # Fijo Obligatorio
 frame_fijo_obligatorio = ttk.Frame(frame_percentages)
