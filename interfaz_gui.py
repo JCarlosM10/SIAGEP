@@ -1,13 +1,10 @@
-import tkinter as tk
-from tkinter import ttk, messagebox,scrolledtext
-from datetime import datetime
-from presupuesto.modelo import PresupuestoMensual
-from presupuesto.operaciones import agregar_transaccion, agregar_ahorro
-from presupuesto.persistencia import cargar_desde_excel, guardar_en_excel
+import tkinter as tk 
+from tkinter import ttk, messagebox,scrolledtext 
+from datetime import datetime 
+from presupuesto.puente import cargar_presupuesto, registrar_transaccion, registrar_ahorro 
 
 ARCHIVO_EXCEL = "data/presupuesto.xlsx" 
-presupuesto = cargar_desde_excel(ARCHIVO_EXCEL)
-
+presupuesto = cargar_presupuesto()
 
 # Funciones para registros y actualizaciones
 # Función para registrar transacciones
@@ -54,8 +51,7 @@ def registrar():
         messagebox.showerror("Error", "El monto debe ser un número.")
         return
 
-    agregar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha, tipo_gasto)
-    guardar_en_excel(presupuesto, ARCHIVO_EXCEL)
+    registrar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha, tipo_gasto) 
     messagebox.showinfo("Éxito", f"{tipo.capitalize()} registrado.")
     tipo_var.set("Seleccionar")
     entrada_categoria.set("Seleccionar")
@@ -97,8 +93,7 @@ def registrar_aportacion():
         messagebox.showerror("Error", "Escribe una descripción.")
         return
 
-    agregar_ahorro(presupuesto, tipo, monto_aportacion, descripcion_ahorro, fecha)
-    guardar_en_excel(presupuesto, ARCHIVO_EXCEL)
+    registrar_ahorro(presupuesto, monto_aportacion, descripcion_ahorro, fecha)
     messagebox.showinfo("Éxito", f"Aportación al ahorro registrada: ${monto_aportacion:.2f}")
     entrada_aportacion.delete(0, tk.END)
     entrada_descripcion_ahorro.delete(0, tk.END)
@@ -233,12 +228,12 @@ ttk.Combobox(frame_main, textvariable=tipo_var, values=["Ingreso", "Egreso"], st
 #Fecha
 ttk.Label(frame_main, text="Fecha (DD-MM-AAAA):").pack()
 fecha_actual = tk.BooleanVar()
-fecha_actual.set(True)
+fecha_actual.set(False)
 fecha_actual.trace("w",toggle_entrada_fecha)
 check_fecha = ttk.Checkbutton(frame_main, text="Usar fecha actual", variable=fecha_actual) ; check_fecha.pack()
 entrada_fecha = ttk.Entry(frame_main)
 if not fecha_actual.get():
-    entrada_fecha.pack_forget()
+    entrada_fecha.pack()
 
 #Frame para datos de entrada
 frame_inputs = ttk.Frame(frame_main)
@@ -328,7 +323,7 @@ frame_percentages.pack(pady=10, padx=10, fill="x")
 # Distribución de gastos
 ttk.Label(frame_percentages, text="Distribución de Gastos", font=("Arial", 14, "bold")).pack(pady=5)
 style = ttk.Style()
-style.configure("Chunky.Horizontal.TProgressbar", barsize=1000,bordercolor='white',thickness=1000)
+style.configure("Chunky.Horizontal.TProgressbar", barsize=1000,bordercolor='black',thickness=15)
 
 # Fijo Obligatorio
 frame_fijo_obligatorio = ttk.Frame(frame_percentages)
@@ -378,8 +373,7 @@ progress_saldo.grid(row=1, column=0, sticky="w", padx=5)
 label_saldo = ttk.Label(frame_saldo, text="0%")
 label_saldo.grid(row=1, column=1, sticky="w", padx=5)
 
-
 # Iniciar
 actualizar_resultado()
-monitor_sizes()
+#monitor_sizes()
 ventana.mainloop()
