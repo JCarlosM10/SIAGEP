@@ -14,16 +14,16 @@ class Transaccion_I:
 class Transaccion_E:
     tipo: str  # "egreso"
     categoria: str
-    tipo_gasto: str
     descripcion: str
     monto: float
     fecha: datetime.date
+    tipo_gasto: str
 
 @dataclass
 class Transaccion_A:
     tipo: str  # "ahorro"
-    monto: float
     descripcion: str
+    monto: float
     fecha: datetime.date
 
 @dataclass

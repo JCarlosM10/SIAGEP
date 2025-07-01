@@ -3,17 +3,19 @@ from tkinter import ttk, messagebox,scrolledtext
 from datetime import datetime 
 from presupuesto.puente import cargar_presupuesto, registrar_transaccion, registrar_ahorro 
 
-ARCHIVO_EXCEL = "data/presupuesto.xlsx" 
+#ARCHIVO_EXCEL = "data/presupuesto.xlsx" 
 presupuesto = cargar_presupuesto()
 
 # Funciones para registros y actualizaciones
 # Función para registrar transacciones
 def registrar():
+    
+
     tipo = tipo_var.get()
     if tipo == "Seleccionar":
         messagebox.showerror("Error", "Seleccione un tipo de transacción.")
         return
-    
+    global presupuesto
     categoria = entrada_categoria.get()
     if categoria == "Seleccionar":
         messagebox.showerror("Error", "Seleccione una categoría.")
@@ -49,10 +51,13 @@ def registrar():
         monto = float(entrada_monto.get())
     except ValueError:
         messagebox.showerror("Error", "El monto debe ser un número.")
-        return
+        return 
 
     registrar_transaccion(presupuesto, tipo, categoria, descripcion, monto, fecha, tipo_gasto) 
     messagebox.showinfo("Éxito", f"{tipo.capitalize()} registrado.")
+    
+    presupuesto = cargar_presupuesto()
+    
     tipo_var.set("Seleccionar")
     entrada_categoria.set("Seleccionar")
     entrada_descripcion.delete(0, tk.END)
@@ -63,6 +68,8 @@ def registrar():
 
 # Función para registrar aportaciones al ahorro
 def registrar_aportacion():
+    global presupuesto
+
     tipo = "Ahorro"
     try:
         monto_aportacion = float(entrada_aportacion.get())
@@ -93,8 +100,12 @@ def registrar_aportacion():
         messagebox.showerror("Error", "Escribe una descripción.")
         return
 
-    registrar_ahorro(presupuesto, monto_aportacion, descripcion_ahorro, fecha)
+    registrar_ahorro(presupuesto,tipo, descripcion_ahorro, monto_aportacion, fecha)
     messagebox.showinfo("Éxito", f"Aportación al ahorro registrada: ${monto_aportacion:.2f}")
+    
+    #global presupuesto 
+    presupuesto = cargar_presupuesto()
+    
     entrada_aportacion.delete(0, tk.END)
     entrada_descripcion_ahorro.delete(0, tk.END)
     fecha_actual.set(True)
@@ -112,12 +123,14 @@ def actualizar_resultado():
         fecha_user = t.fecha.strftime("%d-%m-%Y")
         line = f"- {t.categoria:<15} | {t.descripcion}: ${t.monto:.2f}"
         resumen += f"{line:<{total_width-5}}{fecha_user:>25}\n"
+    
     egresos_ordenados = sorted(presupuesto.egresos, key=lambda x: x.fecha)  
     resumen += "\nEgresos:\n"
     for t in egresos_ordenados:
         fecha_user = t.fecha.strftime("%d-%m-%Y")
         line = f"- {t.categoria:<15} | {t.descripcion}: ${t.monto:.2f}"
         resumen += f"{line:<{total_width-5}}{fecha_user:>25}\n"
+    
     ahorros_ordenados = sorted(presupuesto.ahorros, key=lambda x: x.fecha)
     resumen += "\nAportaciones al Ahorro:\n"
     for t in ahorros_ordenados:
