@@ -72,4 +72,5 @@ def obtener_ahorros():
     conexion.close()
     return ahorros if ahorros else []
 
-create_database()
+#
+# create_database()

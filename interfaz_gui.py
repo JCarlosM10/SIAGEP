@@ -9,8 +9,9 @@ presupuesto = cargar_presupuesto()
 # Funciones para registros y actualizaciones
 # Función para registrar transacciones
 def registrar():
+    monto: float
+    fecha: datetime.date
     
-
     tipo = tipo_var.get()
     if tipo == "Seleccionar":
         messagebox.showerror("Error", "Seleccione un tipo de transacción.")
